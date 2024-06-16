@@ -13,8 +13,17 @@ export default defineConfig({
     VueDevTools(),
   ],
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+    alias: [
+      {
+        find: /@\/components\/((?!.*[.](ts|js|tsx|jsx|vue)$).*$)/,
+        replacement: fileURLToPath(
+          new URL("./src/components/$1/index.vue", import.meta.url)
+        ),
+      },
+      {
+        find: "@",
+        replacement: fileURLToPath(new URL("./src", import.meta.url)),
+      },
+    ]
   }
 })
