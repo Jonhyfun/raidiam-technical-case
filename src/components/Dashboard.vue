@@ -1,35 +1,51 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useParticipants } from '../stores/participants'
 
-export default defineComponent({
-  data: function () {
-    return {
-      series: [44, 55, 13, 43, 22],
-      chartOptions: {
+const { participants } = useParticipants()
+
+const countryStats = ref<{ countries: string[]; totals: number[] }>({ countries: [], totals: [] })
+
+const chartOptions = {
+  chart: {
+    width: 380,
+    type: 'pie'
+  },
+  labels: countryStats.value.countries,
+  responsive: [
+    {
+      breakpoint: 480,
+      options: {
         chart: {
-          width: 380,
-          type: 'pie'
+          width: 200
         },
-        labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
-        responsive: [
-          {
-            breakpoint: 480,
-            options: {
-              chart: {
-                width: 200
-              },
-              legend: {
-                position: 'bottom'
-              }
-            }
-          }
-        ]
+        legend: {
+          position: 'bottom'
+        }
       }
     }
-  }
+  ]
+}
+
+onMounted(() => {
+  participants!.forEach(({ Country }) => {
+    let countryIndex = countryStats.value.countries.indexOf(Country)
+    if (countryIndex === -1) {
+      countryIndex = 0
+      countryStats.value.countries.push(Country)
+      countryStats.value.totals.push(0)
+    }
+
+    countryStats.value.totals[countryIndex] += 1
+  })
 })
 </script>
 
 <template>
-  <apexchart type="pie" width="500" :options="chartOptions" :series="series"></apexchart>
+  <apexchart
+    type="pie"
+    width="500"
+    :options="chartOptions"
+    :series="countryStats.totals"
+  ></apexchart>
 </template>

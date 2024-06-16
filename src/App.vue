@@ -3,6 +3,16 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Header from '@/components/layout/Header.vue'
 import Sidebar from '@/components/layout/Sidebar'
 import { RouterView } from 'vue-router'
+import { useParticipants } from './stores/participants'
+import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+
+const participantsStore = useParticipants()
+const { loadingParticipants } = storeToRefs(participantsStore)
+
+onMounted(() => {
+  participantsStore.loadParticipants()
+})
 </script>
 
 <template>
@@ -28,13 +38,16 @@ import { RouterView } from 'vue-router'
               iconComponent: FontAwesomeIcon,
               iconProps: { icon: ['fas', 'earth-americas'] }
             },
-            src: '/'
+            src: '/demographic'
           }
         ]
       }
     }"
   />
-  <RouterView />
+  <RouterView v-if="!loadingParticipants" />
+  <div v-else>
+    <span>Loading...</span>
+  </div>
 </template>
 
 <style scoped></style>

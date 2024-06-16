@@ -15,6 +15,12 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: /@\/stores\/((?!.*[.](ts|js)$).*$)/,
+        replacement: fileURLToPath(
+          new URL("./src/stores/$1/index.vue", import.meta.url)
+        ),
+      },
+      {
         find: /@\/components\/((?!.*[.](ts|js|tsx|jsx|vue)$).*$)/,
         replacement: fileURLToPath(
           new URL("./src/components/$1/index.vue", import.meta.url)

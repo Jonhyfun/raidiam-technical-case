@@ -18,13 +18,13 @@ function onClick() {
 <template>
   <span
     @click="onClick"
-    :class="`${iconOnly ? 'w-8 h-8' : 'px-2.5 py-1'} flex items-center justify-between gap-2 bg-emerald-200 text-emerald-950 rounded-md w-full group cursor-pointer`"
+    :class="`${iconOnly ? 'w-8 h-8' : 'px-2.5 py-1'} select-none flex items-center justify-between gap-2 bg-emerald-200 text-emerald-950 rounded-md w-full group cursor-pointer`"
   >
     <span :class="`flex gap-2 items-center ${iconOnly ? 'm-auto' : ''}`">
       <component
         :is="icon.iconComponent"
         v-bind="icon.iconProps"
-        class="text-lg group-hover:text-emerald-500"
+        :class="`text-lg ${selected ? 'text-emerald-600' : 'group-hover:text-emerald-600'}`"
       />
       <slot v-if="!iconOnly" name="label"></slot>
     </span>

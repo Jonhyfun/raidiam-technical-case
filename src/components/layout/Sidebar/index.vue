@@ -2,7 +2,7 @@
 import type { IconType } from '@/utils/types'
 import SidebarOption from './SidebarOption.vue'
 import { ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 defineProps<{
   options: {
@@ -16,6 +16,8 @@ defineProps<{
     }
   }
 }>()
+
+const router = useRouter()
 
 const isSidebarOpen = ref(false)
 const openGroups = ref<string[]>([])
@@ -83,9 +85,14 @@ watch(isSidebarOpen, (newValue) => {
         <ul v-if="isSidebarOpen && openGroups.includes(groupName)">
           <li v-for="option in groupOptions" :key="option.label">
             <RouterLink :to="option.src" class="flex items-center gap-2 ml-3">
-              <SidebarOption :icon="option.icon">
+              <SidebarOption
+                :icon="option.icon"
+                :selected="router.currentRoute.value.path === option.src"
+              >
                 <template #label>
-                  <h2 class="font-semibold text-md group-hover:text-emerald-500 w-full">
+                  <h2
+                    :class="`font-semibold text-md ${router.currentRoute.value.path === option.src ? 'text-emerald-600' : 'group-hover:text-emerald-600'} w-full`"
+                  >
                     {{ option.label }}
                   </h2>
                 </template>
