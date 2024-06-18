@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { IconType } from '@/utils/types'
 import SidebarOption from './SidebarOption.vue'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
 defineProps<{
@@ -36,10 +36,16 @@ function toggleGroupOpen(group: string) {
 
 watch(isSidebarOpen, (newValue) => {
   if (newValue) {
-    document.body.classList.add('pl-52')
+    document.querySelector('#app')!.classList.remove('pl-20')
+    document.querySelector('#app')!.classList.add('pl-52')
   } else {
-    document.body.classList.remove('pl-52')
+    document.querySelector('#app')!.classList.add('pl-20')
+    document.querySelector('#app')!.classList.remove('pl-52')
   }
+})
+
+onMounted(() => {
+  document.querySelector('#app')!.classList.add('pl-20')
 })
 </script>
 

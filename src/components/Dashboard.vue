@@ -22,19 +22,6 @@ const getChartOptions = (prop: ParticipantObjectNestedKeys): ApexOptions => ({
     width: 200
   },
   labels: stats.value[prop]?.entries ?? []
-  //responsive: [
-  //  {
-  //    breakpoint: 480,
-  //    options: {
-  //      chart: {
-  //        width: 200
-  //      },
-  //      legend: {
-  //        position: 'bottom'
-  //      }
-  //    }
-  //  }
-  //]
 })
 
 onMounted(() => {
@@ -43,20 +30,31 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex w-full items-center gap-5 rounded-md bg-emerald-200 p-4">
-    <apexchart
-      type="pie"
-      width="600px"
-      height="600px"
-      :options="getChartOptions('City')"
-      :series="stats.City?.counts ?? []"
-    ></apexchart>
-    <apexchart
-      type="pie"
-      width="600px"
-      height="600px"
-      :options="getChartOptions('Country')"
-      :series="stats.Country?.counts ?? []"
-    ></apexchart>
+  <div class="mx-auto flex h-full w-[85.375rem] flex-col items-start gap-10 pt-10">
+    <h2 class="text-4xl font-semibold text-emerald-50">
+      <font-awesome-icon icon="fa-solid fa-chart-pie" /> Demographic Data
+    </h2>
+    <div class="flex items-center gap-5 rounded-md bg-emerald-200 p-4">
+      <div class="flex flex-col gap-3">
+        <h2 class="text-2xl font-semibold text-black">By Country</h2>
+        <apexchart
+          type="pie"
+          width="600px"
+          height="600px"
+          :options="getChartOptions('Country')"
+          :series="stats.Country?.counts ?? []"
+        ></apexchart>
+      </div>
+      <div class="flex flex-col gap-3">
+        <h2 class="text-2xl font-semibold text-black">By City</h2>
+        <apexchart
+          type="pie"
+          width="600px"
+          height="600px"
+          :options="getChartOptions('City')"
+          :series="stats.City?.counts ?? []"
+        ></apexchart>
+      </div>
+    </div>
   </div>
 </template>
