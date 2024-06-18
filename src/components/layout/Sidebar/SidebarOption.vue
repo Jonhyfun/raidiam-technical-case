@@ -18,9 +18,9 @@ function onClick() {
 <template>
   <span
     @click="onClick"
-    :class="`${iconOnly ? 'w-8 h-8' : 'px-2.5 py-1'} select-none flex items-center justify-between gap-2 bg-emerald-200 text-emerald-950 rounded-md w-full group cursor-pointer`"
+    :class="`${iconOnly ? 'h-8 w-8' : 'px-2.5 py-1'} group flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-md bg-emerald-200 text-emerald-950`"
   >
-    <span :class="`flex gap-2 items-center ${iconOnly ? 'm-auto' : ''}`">
+    <span :class="`flex items-center gap-2 ${iconOnly ? 'm-auto' : ''}`">
       <component
         :is="icon.iconComponent"
         v-bind="icon.iconProps"

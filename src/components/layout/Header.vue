@@ -2,12 +2,12 @@
 
 <template>
   <header
-    class="fixed flex gap-10 top-0 left-0 right-0 items-center h-11 bg-emerald-900 shadow-md z-30"
+    class="fixed left-0 right-0 top-0 z-30 flex h-11 items-center gap-10 bg-emerald-900 shadow-md"
   >
-    <div class="w-32 flex justify-center">
+    <div class="flex w-32 justify-center">
       <slot name="logo"></slot>
     </div>
-    <nav class="flex gap-3 w-full">
+    <nav class="flex w-full gap-3">
       <ul>
         <slot name="links"></slot>
       </ul>

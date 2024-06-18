@@ -1,51 +1,62 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useParticipants } from '../stores/participants'
+import type { ParticipantObjectNestedKeys } from '@/stores/participants/types'
+import type { ApexOptions } from 'apexcharts'
 
-const { participants } = useParticipants()
+const { aggregateByProperties } = useParticipants()
 
-const countryStats = ref<{ countries: string[]; totals: number[] }>({ countries: [], totals: [] })
+const stats = ref<
+  Partial<{
+    [key in ParticipantObjectNestedKeys]: { entries: string[]; counts: number[] }
+  }>
+>({} as any)
 
-const chartOptions = {
+const getChartOptions = (prop: ParticipantObjectNestedKeys): ApexOptions => ({
   chart: {
     width: 380,
+    height: 380,
     type: 'pie'
   },
-  labels: countryStats.value.countries,
-  responsive: [
-    {
-      breakpoint: 480,
-      options: {
-        chart: {
-          width: 200
-        },
-        legend: {
-          position: 'bottom'
-        }
-      }
-    }
-  ]
-}
+  legend: {
+    width: 200
+  },
+  labels: stats.value[prop]?.entries ?? []
+  //responsive: [
+  //  {
+  //    breakpoint: 480,
+  //    options: {
+  //      chart: {
+  //        width: 200
+  //      },
+  //      legend: {
+  //        position: 'bottom'
+  //      }
+  //    }
+  //  }
+  //]
+})
 
 onMounted(() => {
-  participants!.forEach(({ Country }) => {
-    let countryIndex = countryStats.value.countries.indexOf(Country)
-    if (countryIndex === -1) {
-      countryIndex = 0
-      countryStats.value.countries.push(Country)
-      countryStats.value.totals.push(0)
-    }
-
-    countryStats.value.totals[countryIndex] += 1
-  })
+  stats.value = aggregateByProperties('Country', 'City')
 })
 </script>
 
 <template>
-  <apexchart
-    type="pie"
-    width="500"
-    :options="chartOptions"
-    :series="countryStats.totals"
-  ></apexchart>
+  <div class="flex w-full items-center gap-5 rounded-md bg-emerald-200 p-4">
+    <apexchart
+      type="pie"
+      width="600px"
+      height="600px"
+      :options="getChartOptions('City')"
+      :series="stats.City?.counts ?? []"
+    ></apexchart>
+    <apexchart
+      type="pie"
+      width="600px"
+      height="600px"
+      :options="getChartOptions('Country')"
+      :series="stats.Country?.counts ?? []"
+    ></apexchart>
+  </div>
 </template>

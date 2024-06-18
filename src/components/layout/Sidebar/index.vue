@@ -45,16 +45,16 @@ watch(isSidebarOpen, (newValue) => {
 
 <template>
   <aside
-    :class="`fixed h-full left-0 top-11 ${isSidebarOpen ? 'w-52' : 'w-20'} bg-emerald-950 shadow-md flex flex-col items-center justify-start py-5 px-6`"
+    :class="`fixed left-0 top-11 h-full ${isSidebarOpen ? 'w-52' : 'w-20'} flex flex-col items-center justify-start bg-emerald-950 px-6 py-5 shadow-md`"
   >
-    <div class="w-full mb-10">
+    <div class="mb-10 w-full">
       <font-awesome-icon
         icon="fa-solid fa-arrow-right-from-bracket"
         @click="toggleSidebar"
-        :class="`${isSidebarOpen ? 'rotate-180 ml-auto' : 'm-auto'} block text-lg cursor-pointer hover:text-emerald-400`"
+        :class="`${isSidebarOpen ? 'ml-auto rotate-180' : 'm-auto'} block cursor-pointer text-lg hover:text-emerald-400`"
       />
     </div>
-    <div class="flex flex-col gap-2 w-full">
+    <div class="flex w-full flex-col gap-2">
       <template
         v-for="[groupName, { groupIcon, groupOptions }] in Object.entries(options)"
         :key="groupName"
@@ -66,14 +66,14 @@ watch(isSidebarOpen, (newValue) => {
           group-parent
         >
           <template #label>
-            <h2 class="font-semibold text-md group-hover:text-emerald-500">
+            <h2 class="text-md font-semibold group-hover:text-emerald-500">
               {{ groupName }}
             </h2>
           </template>
           <template #append>
             <font-awesome-icon
               v-if="isSidebarOpen"
-              class="group-hover:text-emerald-500 text-sm"
+              class="text-sm group-hover:text-emerald-500"
               :icon="
                 openGroups.includes(groupName)
                   ? 'fa-solid fa-chevron-down'
@@ -84,14 +84,14 @@ watch(isSidebarOpen, (newValue) => {
         </SidebarOption>
         <ul v-if="isSidebarOpen && openGroups.includes(groupName)">
           <li v-for="option in groupOptions" :key="option.label">
-            <RouterLink :to="option.src" class="flex items-center gap-2 ml-3">
+            <RouterLink :to="option.src" class="ml-3 flex items-center gap-2">
               <SidebarOption
                 :icon="option.icon"
                 :selected="router.currentRoute.value.path === option.src"
               >
                 <template #label>
                   <h2
-                    :class="`font-semibold text-md ${router.currentRoute.value.path === option.src ? 'text-emerald-600' : 'group-hover:text-emerald-600'} w-full`"
+                    :class="`text-md font-semibold ${router.currentRoute.value.path === option.src ? 'text-emerald-600' : 'group-hover:text-emerald-600'} w-full`"
                   >
                     {{ option.label }}
                   </h2>
