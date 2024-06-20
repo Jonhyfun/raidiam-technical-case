@@ -37,10 +37,11 @@ export const useParticipants = defineStore('participants', () => {
         if (entryIndex === -1) {
           entryIndex = 0
           result[property].entries.push(propertyValue)
-          result[property].counts.push(0)
+          result[property].counts.push(1)
         }
-
-        result[property].counts[entryIndex] += 1
+        else {
+          result[property].counts[entryIndex] += 1
+        }
       })
     })
 

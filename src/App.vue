@@ -45,7 +45,7 @@ onMounted(() => {
     }"
   />
   <RouterView v-if="!loadingParticipants" />
-  <div class="m-auto block w-fit" v-else>
+  <div class="m-auto block h-full w-fit content-center" v-else>
     <span>Loading...</span>
   </div>
 </template>
