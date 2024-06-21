@@ -1,5 +1,3 @@
-import type { Paths, UnarrayProperties } from '@/utils/types'
-
 type CertificationRedirectEnum =
   | 'FAPI Adv. OP w/ MTLS'
   | 'FAPI Adv. OP w/ MTLS, PAR'
@@ -58,11 +56,11 @@ interface ApiResource {
   FamilyComplete: boolean
   ApiCertificationUri: string
   CertificationStatus:
-    | 'Awaiting Certification'
-    | 'Certified'
-    | 'Deprecated'
-    | 'Rejected'
-    | 'Self-Certified'
+  | 'Awaiting Certification'
+  | 'Certified'
+  | 'Deprecated'
+  | 'Rejected'
+  | 'Self-Certified'
   CertificationStartDate: string // Assuming this is a date string
   CertificationExpirationDate: string // Assuming this is a date string
   ApiFamilyType: string
@@ -110,5 +108,3 @@ export interface ParticipantObject {
   OrgDomainClaims: OrganisationAuthorityDomainClaim[]
   OrgDomainRoleClaims: OrganisationAuthorityClaim[]
 }
-
-export type ParticipantObjectNestedKeys = Paths<UnarrayProperties<ParticipantObject>>

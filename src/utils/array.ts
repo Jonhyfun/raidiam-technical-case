@@ -37,6 +37,35 @@ export function sortSiblingArrays<T extends any[]>(sortFunction: (a: T[number], 
   return newArrays;
 }
 
+export function filterSiblingArrays<T extends any[]>(
+  filterFunction: (value: T[number], index: number, array: T) => boolean,
+  array: T,
+  ...relatedArrays: any[]
+): any[][] {
+  if (relatedArrays.some(arr => arr.length !== array.length)) {
+    throw new Error("All arrays must be of equal length");
+  }
+
+  const indexMap = array.map((value, index) => ({
+    value,
+    index,
+  })).filter(({ value, index }) => filterFunction(value, index, array)).map(({ index }) => index);
+
+  const newArrays = [new Array(indexMap.length)];
+  relatedArrays.forEach(() => {
+    newArrays.push(new Array(indexMap.length));
+  });
+
+  indexMap.forEach((oldIndex, newIndex) => {
+    newArrays[0][newIndex] = array[oldIndex];
+    relatedArrays.forEach((arr, i) => {
+      newArrays[i + 1][newIndex] = arr[oldIndex];
+    });
+  });
+
+  return newArrays;
+}
+
 export function slicePagination(page: number, perPage: number) {
   const startsAt = perPage * (page - 1);
   const endsAt = perPage * page;

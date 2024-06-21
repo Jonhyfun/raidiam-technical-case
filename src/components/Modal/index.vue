@@ -11,7 +11,7 @@ const emit = defineEmits(['closeClick'])
   >
     <div @click="(e) => e.stopPropagation()" class="w-96 rounded-lg bg-white p-6 shadow-lg">
       <div class="mb-4 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-black">Dialog Title</h2>
+        <slot name="title"></slot>
         <button @click="() => emit('closeClick')" class="text-gray-500 hover:text-gray-700">
           <svg
             class="h-6 w-6"
@@ -30,7 +30,7 @@ const emit = defineEmits(['closeClick'])
         </button>
       </div>
 
-      <p class="text-black">This is the dialog content. You can put anything here.</p>
+      <slot name="content"></slot>
     </div>
   </div>
 </template>

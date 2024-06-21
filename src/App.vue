@@ -6,9 +6,13 @@ import { RouterView } from 'vue-router'
 import { useParticipants } from './stores/participants'
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useDashboard } from './stores/dashboard'
 
 const participantsStore = useParticipants()
 const { loadingParticipants } = storeToRefs(participantsStore)
+
+const dashboardStore = useDashboard()
+const { isSidebarOpen } = storeToRefs(dashboardStore)
 
 onMounted(() => {
   participantsStore.loadParticipants()
@@ -18,10 +22,7 @@ onMounted(() => {
 <template>
   <Header>
     <template #logo>
-      <RouterLink to="/"> Teste </RouterLink>
-    </template>
-    <template #links>
-      <RouterLink class="font-medium" to="/about">About</RouterLink>
+      <RouterLink to="/"> Raidiam Connect </RouterLink>
     </template>
   </Header>
   <Sidebar
@@ -39,12 +40,22 @@ onMounted(() => {
               iconProps: { icon: ['fas', 'earth-americas'] }
             },
             src: '/demographic'
+          },
+          {
+            label: 'Authorization',
+            icon: {
+              iconComponent: FontAwesomeIcon,
+              iconProps: { icon: ['fas', 'lock'] }
+            },
+            src: '/authorization?threshold=2'
           }
         ]
       }
     }"
   />
-  <RouterView v-if="!loadingParticipants" />
+  <main :class="`${isSidebarOpen ? 'pl-52' : 'pl-20'}`" v-if="!loadingParticipants">
+    <RouterView />
+  </main>
   <div class="m-auto block h-full w-fit content-center" v-else>
     <span>Loading...</span>
   </div>

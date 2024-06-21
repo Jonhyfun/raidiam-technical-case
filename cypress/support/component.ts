@@ -24,6 +24,17 @@ import '@/assets/main.css'
 
 import { mount } from 'cypress/vue'
 
+import { useDashboard } from '../../src/stores/dashboard'
+import { createPinia, setActivePinia } from 'pinia'
+
+setActivePinia(
+  createPinia()
+)
+
+const dashboardStore = useDashboard()
+
+Cypress.Commands.add('getDashboardStore', () => dashboardStore)
+
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
 // Alternatively, can be defined in cypress/support/component.d.ts
@@ -33,6 +44,7 @@ declare global {
   namespace Cypress {
     interface Chainable {
       mount: typeof mount
+      getDashboardStore()
     }
   }
 }

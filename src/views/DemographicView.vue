@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Dashboard from '../components/Dashboard.vue'
+import DemographicDash from '../components/DemographicDashboard.vue'
 </script>
 
 <template>
-  <Dashboard />
+  <DemographicDash />
 </template>

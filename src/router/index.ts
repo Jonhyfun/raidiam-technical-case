@@ -1,27 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import DashboardView from '../views/DashboardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: DashboardView
-    },
-    {
       path: '/',
-      redirect: '/dashboard'
+      redirect: '/demographic'
     },
     {
       path: '/demographic',
-      name: 'demographic',
+      name: 'Demographic Dashboard',
       component: () => import('../views/DemographicView.vue')
     },
     {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue')
+      path: '/authorization',
+      name: 'Authorization Dashboard',
+      component: () => import('../views/ServersView.vue')
     }
   ]
 })

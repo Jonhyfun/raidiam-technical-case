@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { IconType } from '@/utils/types'
 import SidebarOption from './SidebarOption.vue'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import { useDashboard } from '../../../stores/dashboard'
+import { storeToRefs } from 'pinia'
 
-defineProps<{
+const props = defineProps<{
   options: {
     [key: string]: {
       groupIcon: IconType
@@ -19,12 +21,10 @@ defineProps<{
 
 const router = useRouter()
 
-const isSidebarOpen = ref(false)
-const openGroups = ref<string[]>([])
+const dashboardStore = useDashboard()
+const { isSidebarOpen } = storeToRefs(dashboardStore)
 
-function toggleSidebar() {
-  isSidebarOpen.value = !isSidebarOpen.value
-}
+const openGroups = ref<string[]>([Object.keys(props.options)[0]])
 
 function toggleGroupOpen(group: string) {
   if (openGroups.value.includes(group)) {
@@ -33,20 +33,6 @@ function toggleGroupOpen(group: string) {
   }
   openGroups.value.push(group)
 }
-
-watch(isSidebarOpen, (newValue) => {
-  if (newValue) {
-    document.querySelector('#app')!.classList.remove('pl-20')
-    document.querySelector('#app')!.classList.add('pl-52')
-  } else {
-    document.querySelector('#app')!.classList.add('pl-20')
-    document.querySelector('#app')!.classList.remove('pl-52')
-  }
-})
-
-onMounted(() => {
-  document.querySelector('#app')!.classList.add('pl-20')
-})
 </script>
 
 <template>
@@ -56,7 +42,7 @@ onMounted(() => {
     <div class="mb-10 w-full">
       <font-awesome-icon
         icon="fa-solid fa-arrow-right-from-bracket"
-        @click="toggleSidebar"
+        @click="dashboardStore.toggleSidebar"
         :class="`${isSidebarOpen ? 'ml-auto rotate-180' : 'm-auto'} block cursor-pointer text-lg hover:text-emerald-400`"
       />
     </div>
@@ -88,16 +74,18 @@ onMounted(() => {
             />
           </template>
         </SidebarOption>
-        <ul v-if="isSidebarOpen && openGroups.includes(groupName)">
+        <ul v-if="isSidebarOpen && openGroups.includes(groupName)" class="flex flex-col gap-1">
           <li v-for="option in groupOptions" :key="option.label">
             <RouterLink :to="option.src" class="ml-3 flex items-center gap-2">
               <SidebarOption
                 :icon="option.icon"
-                :selected="router.currentRoute.value.path === option.src"
+                :selected="
+                  router.currentRoute.value.path.split('?')[0] === option.src.split('?')[0]
+                "
               >
                 <template #label>
                   <h2
-                    :class="`text-md font-semibold ${router.currentRoute.value.path === option.src ? 'text-emerald-600' : 'group-hover:text-emerald-600'} w-full`"
+                    :class="`text-md font-semibold ${router.currentRoute.value.path.split('?')[0] === option.src.split('?')[0] ? 'text-emerald-600' : 'group-hover:text-emerald-600'} w-full`"
                   >
                     {{ option.label }}
                   </h2>
