@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import type { ApexOptions } from 'apexcharts'
 import ThresholdModal from '@/components/Modal/ThresholdModal.vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import PageContainer from '@/components/layout/PageContainer.vue'
+import PieChart from '@/components/charts/PieChart.vue'
+import BarChart from '@/components/charts/BarChart.vue'
+
+import { onMounted, ref, watch } from 'vue'
 import { useParticipants } from '../stores/participants'
-import {
-  filterSiblingArrays,
-  numericalSort,
-  slicePagination,
-  sortSiblingArrays
-} from '@/utils/array'
+import { filterSiblingArrays, numericalSort, sortSiblingArrays } from '@/utils/array'
 
 const { aggregateByProperties } = useParticipants()
 
@@ -26,148 +24,33 @@ const thresholdModalOpen = ref<boolean>(false)
 const appliedOptions = ref(0)
 const cityRankingOrder = ref<'asc' | 'desc'>('desc')
 
-const barChartPagination = ref<{ totalPages: number; currentPage: number }>({
-  totalPages: 1,
-  currentPage: 1
-})
-
-const barChartSeries = computed(() => {
-  const [startsAt, endsAt] = slicePagination(barChartPagination.value.currentPage, 10)
-  return [{ data: cityRanking.value?.counts.slice(startsAt, endsAt) ?? [] }]
-})
-
-const pieChartOptions = computed<ApexOptions>(() => ({
-  chart: {
-    width: '600px',
-    height: '600px',
-    type: 'pie',
-    toolbar: {
-      show: true
-    }
-  },
-  stroke: {
-    width: 1,
-    colors: ['#000']
-  },
-  legend: {
-    width: 200
-  }
-}))
-
-const countryPieChartOptions = computed(() => ({
-  ...pieChartOptions.value,
-  labels: stats.value['Country']?.entries ?? []
-}))
-
-const cityPieChartOptions = computed(() => ({
-  ...pieChartOptions.value,
-  labels: stats.value['City']?.entries ?? []
-}))
-
-const barChartOptions = computed<ApexOptions>(() => {
-  const [startsAt, endsAt] = slicePagination(barChartPagination.value.currentPage, 10)
-
-  return {
-    chart: {
-      type: 'bar',
-      animations: {
-        enabled: false
-      }
-    },
-    plotOptions: {
-      bar: {
-        barHeight: '80%',
-        distributed: true,
-        horizontal: true,
-        dataLabels: {
-          position: 'bottom'
-        }
-      }
-    },
-    legend: {
-      show: false
-    },
-    dataLabels: {
-      enabled: true,
-      textAnchor: 'start',
-      style: {
-        colors: ['#fff'],
-        fontSize: '14px'
-      },
-      background: {
-        enabled: true,
-        foreColor: '#000',
-        opacity: 0.7
-      },
-      formatter: function (val, opt) {
-        return opt.w.globals.labels[opt.dataPointIndex] + ':  ' + val
-      },
-      offsetX: 0,
-      dropShadow: {
-        enabled: true
-      }
-    },
-    stroke: {
-      width: 1,
-      colors: ['#000']
-    },
-    xaxis: {
-      categories: cityRanking.value?.entries.slice(startsAt, endsAt) ?? [],
-      min: 0,
-      max:
-        [...(cityRanking.value?.counts ?? [])].sort((a, b) => numericalSort(a, b, 'desc'))[0] ?? 0
-    },
-    yaxis: {
-      labels: {
-        show: false
-      }
-    },
-    tooltip: {
-      theme: 'dark',
-      x: {
-        show: false
-      },
-      y: {
-        title: {
-          formatter: function () {
-            return ''
-          }
-        }
-      }
-    }
-  }
-})
-
-console.log({ barChartSeries, barChartOptions })
-
 function onThresholdSet(threshold: number) {
   initializeData()
   appliedOptions.value = 1
 
-  if (stats.value.City) {
-    const [counts, entries] = filterSiblingArrays(
-      (value) => value > threshold,
-      stats.value.City!.counts,
-      stats.value.City!.entries
-    )
-    stats.value.City = { counts, entries }
-  }
-  if (stats.value.Country) {
-    const [counts, entries] = filterSiblingArrays(
-      (value) => value > threshold,
-      stats.value.Country!.counts,
-      stats.value.Country!.entries
-    )
-    stats.value.Country = { counts, entries }
-  }
-  if (cityRanking.value) {
-    const [counts, entries] = filterSiblingArrays(
-      (value) => value > threshold,
-      cityRanking.value!.counts,
-      cityRanking.value!.entries
-    )
-    cityRanking.value = { counts, entries }
-  }
+  const [cityCounts, cityEntries] = filterSiblingArrays(
+    (value) => value > threshold,
+    stats.value.City!.counts,
+    stats.value.City!.entries
+  )
+
+  stats.value.City = { counts: cityCounts, entries: cityEntries }
+
+  const [countryCounts, countryEntries] = filterSiblingArrays(
+    (value) => value > threshold,
+    stats.value.Country!.counts,
+    stats.value.Country!.entries
+  )
+
+  stats.value.Country = { counts: countryCounts, entries: countryEntries }
+
+  const [counts, entries] = filterSiblingArrays(
+    (value) => value > threshold,
+    cityRanking.value!.counts,
+    cityRanking.value!.entries
+  )
+
+  cityRanking.value = { counts, entries }
 }
 
 function initializeData() {
@@ -196,13 +79,13 @@ watch(cityRankingOrder, (order) => {
 })
 
 onMounted(() => {
-  console.log('Running onMounted hook')
   initializeData()
 })
 </script>
 
 <template>
   <ThresholdModal
+    v-if="stats.Country && stats.City && cityRanking"
     :open="thresholdModalOpen"
     :onCloseClick="() => (thresholdModalOpen = false)"
     @onThresholdSet="onThresholdSet"
@@ -213,7 +96,7 @@ onMounted(() => {
       }
     "
   />
-  <div class="mx-auto flex h-full w-[80rem] flex-col items-start gap-12 py-10">
+  <PageContainer>
     <div class="flex w-full items-center justify-between">
       <h2 class="text-4xl font-semibold text-emerald-50">
         <font-awesome-icon icon="fa-solid fa-chart-pie" /> Demographic Data
@@ -234,38 +117,28 @@ onMounted(() => {
       </div>
     </div>
     <div class="flex w-full gap-5">
-      <aside class="flex min-h-[28.188rem] rounded-md bg-emerald-100 p-4">
-        <div v-if="stats.Country?.counts.length === 0" class="w-1/2 text-center">
-          <span class="text-center text-black">No country data for the applied filters.</span>
-        </div>
-        <div v-else class="flex flex-col gap-3">
+      <aside class="flex min-h-[28.188rem] w-full rounded-md bg-emerald-100 p-4">
+        <div class="flex flex-col gap-3">
           <h2 class="text-2xl font-semibold text-black">By Country</h2>
-          <div class="h-[23.438rem] w-[37.5rem]">
-            <apexchart
-              type="pie"
-              width="600px"
-              height="600px"
-              :options="countryPieChartOptions"
-              :series="stats.Country?.counts ?? []"
-            ></apexchart>
-          </div>
+          <PieChart :data="stats.Country">
+            <template #blankState>
+              <div class="m-auto text-center">
+                <span class="text-center text-black">No country data for the applied filters.</span>
+              </div>
+            </template>
+          </PieChart>
         </div>
       </aside>
-      <aside class="flex min-h-[28.188rem] rounded-md bg-emerald-100 p-4">
-        <div v-if="stats.City?.counts.length === 0" class="ml-auto w-1/2 text-center">
-          <span class="text-center text-black">No city data for the applied filters.</span>
-        </div>
-        <div v-else class="flex flex-col gap-3">
+      <aside class="flex min-h-[28.188rem] w-full rounded-md bg-emerald-100 p-4">
+        <div class="flex flex-col gap-3">
           <h2 class="text-2xl font-semibold text-black">By City</h2>
-          <div class="h-[23.438rem] w-[37.5rem]">
-            <apexchart
-              type="pie"
-              width="600px"
-              height="600px"
-              :options="cityPieChartOptions"
-              :series="stats.City?.counts ?? []"
-            ></apexchart>
-          </div>
+          <PieChart :data="stats.City">
+            <template #blankState>
+              <div class="m-auto text-center">
+                <span class="text-center text-black">No city data for the applied filters.</span>
+              </div>
+            </template>
+          </PieChart>
         </div>
       </aside>
     </div>
@@ -282,80 +155,39 @@ onMounted(() => {
         </h2>
       </div>
       <div class="flex h-full w-full gap-8">
-        <div
-          v-if="(cityRanking.counts ?? []).length === 0"
-          class="flex h-full w-full items-center justify-center"
-        >
-          <span class="text-black">No city data for the applied filters.</span>
-        </div>
-        <template v-else>
-          <apexchart
-            type="bar"
-            width="1180px"
-            :series="barChartSeries"
-            :options="barChartOptions"
-          ></apexchart>
-          <div class="flex h-full flex-col justify-between pb-6 pt-8">
-            <span
-              v-if="barChartPagination.currentPage !== 1"
-              @click="() => barChartPagination.currentPage--"
-              class="cursor-pointer select-none text-2xl text-black hover:text-emerald-500"
-            >
-              <font-awesome-icon icon="fa-solid fa-arrow-up" />
-            </span>
-            <span
-              v-if="
-                barChartPagination.currentPage !== Math.ceil((cityRanking?.counts.length ?? 0) / 10)
-              "
-              @click="() => barChartPagination.currentPage++"
-              class="mt-auto cursor-pointer select-none text-2xl text-black hover:text-emerald-500"
-            >
-              <font-awesome-icon icon="fa-solid fa-arrow-down" />
-            </span>
-          </div>
-        </template>
+        <BarChart :data="cityRanking">
+          <template #blankState>
+            <div class="flex h-full w-full items-center justify-center">
+              <span class="text-black">No city data for the applied filters.</span>
+            </div>
+          </template>
+        </BarChart>
       </div>
     </aside>
     <h2 class="text-4xl font-semibold text-emerald-50">
       <font-awesome-icon icon="fa-solid fa-magnifying-glass-chart" /> Compare Data
     </h2>
-    <div class="flex gap-5">
-      <aside class="flex min-h-[28.188rem] rounded-md bg-emerald-100 p-4">
-        <div v-if="stats.Country?.counts.length === 0" class="w-1/2 text-center">
-          <span class="text-center text-black">No country data for the applied filters.</span>
-        </div>
-        <div v-else class="flex flex-col gap-3">
-          <h2 class="text-2xl font-semibold text-black">By Country</h2>
-          <div class="h-[23.438rem] w-[37.5rem]">
-            <apexchart
-              type="pie"
-              width="600px"
-              height="600px"
-              :options="countryPieChartOptions"
-              :series="stats.Country?.counts ?? []"
-            ></apexchart>
-          </div>
-        </div>
+    <div class="flex w-full gap-5">
+      <aside class="flex min-h-[28.188rem] w-full rounded-md bg-emerald-100 p-4">
+        <PieChart :data="stats.Country">
+          <template #blankState>
+            <div class="m-auto text-center">
+              <span class="text-center text-black">No country data for the applied filters.</span>
+            </div>
+          </template>
+        </PieChart>
       </aside>
-      <aside class="flex min-h-[28.188rem] rounded-md bg-emerald-100 p-4">
-        <div v-if="stats.City?.counts.length === 0" class="ml-auto w-1/2 text-center">
-          <span class="text-center text-black">No city data for the applied filters.</span>
-        </div>
-        <div v-else class="flex flex-col gap-3">
-          <h2 class="text-2xl font-semibold text-black">By City</h2>
-          <div class="h-[23.438rem] w-[37.5rem]">
-            <apexchart
-              type="pie"
-              width="600px"
-              height="600px"
-              :options="cityPieChartOptions"
-              :series="stats.City?.counts ?? []"
-            ></apexchart>
-          </div>
-        </div>
+      <aside class="flex min-h-[28.188rem] w-full rounded-md bg-emerald-100 p-4">
+        <PieChart :data="stats.City">
+          <template #blankState>
+            <div class="m-auto text-center">
+              <span class="text-center text-black">No city data for the applied filters.</span>
+            </div>
+          </template>
+        </PieChart>
       </aside>
     </div>
-  </div>
+  </PageContainer>
 </template>
 
 <style>

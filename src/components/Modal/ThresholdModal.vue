@@ -48,13 +48,23 @@ onMounted(() => {
         <div class="flex flex-col gap-1">
           <button
             class="rounded-md bg-emerald-950 px-2.5 py-1.5 font-semibold text-emerald-100 hover:bg-emerald-500 hover:text-emerald-950"
-            @click="() => setThreshold(currentThreshold)"
+            @click="
+              () => {
+                setThreshold(currentThreshold)
+                onCloseClick()
+              }
+            "
           >
             Apply options
           </button>
           <button
             class="rounded-md bg-emerald-950 px-2.5 py-1.5 font-semibold text-emerald-100 hover:bg-emerald-500 hover:text-emerald-950"
-            @click="() => emit('onOptionsCleared')"
+            @click="
+              () => {
+                replace({ path, query: undefined })
+                emit('onOptionsCleared')
+              }
+            "
           >
             Clear options
           </button>
