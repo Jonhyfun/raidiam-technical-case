@@ -96,7 +96,8 @@ onMounted(() => {
       }
     "
   />
-  <div class="mx-auto flex h-full w-[80rem] flex-col items-start gap-12 pt-10">
+  <div class="mx-auto flex h-full w-[80rem] flex-col items-start gap-12 py-10">
+    <!--TODO page container ^-->
     <div class="flex w-full items-center justify-between">
       <h2 class="text-4xl font-semibold text-emerald-50">
         <font-awesome-icon icon="fa-solid fa-chart-pie" /> Authorization Servers Data

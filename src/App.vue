@@ -22,15 +22,21 @@ onMounted(() => {
 <template>
   <Header>
     <template #logo>
-      <RouterLink to="/"> Raidiam Connect </RouterLink>
+      <RouterLink
+        class="group flex items-center gap-2 bg-emerald-800 px-3 py-1 text-white shadow-[2px_2px_6px_black] hover:bg-emerald-400"
+        to="/"
+      >
+        <font-awesome-icon class="group-hover:text-black" :icon="['fas', 'globe']" />
+        <span class="font-bold group-hover:text-black"> Raidiam Connect </span>
+      </RouterLink>
     </template>
   </Header>
   <Sidebar
     :options="{
-      Dashboard: {
+      Participants: {
         groupIcon: {
           iconComponent: FontAwesomeIcon,
-          iconProps: { icon: ['fas', 'chart-pie'] }
+          iconProps: { icon: ['fas', 'user-group'] }
         },
         groupOptions: [
           {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ApexOptions } from 'apexcharts'
 import ThresholdModal from '@/components/Modal/ThresholdModal.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useParticipants } from '../stores/participants'
 import {
   filterSiblingArrays,
@@ -20,8 +20,11 @@ const stats = ref<
   }>
 >({} as any)
 
+const cityRanking = ref<{ entries: string[]; counts: number[] }>({} as any)
+
 const thresholdModalOpen = ref<boolean>(false)
 const appliedOptions = ref(0)
+const cityRankingOrder = ref<'asc' | 'desc'>('desc')
 
 const barChartPagination = ref<{ totalPages: number; currentPage: number }>({
   totalPages: 1,
@@ -30,7 +33,7 @@ const barChartPagination = ref<{ totalPages: number; currentPage: number }>({
 
 const barChartSeries = computed(() => {
   const [startsAt, endsAt] = slicePagination(barChartPagination.value.currentPage, 10)
-  return [{ data: stats.value.City?.counts.slice(startsAt, endsAt) ?? [] }]
+  return [{ data: cityRanking.value?.counts.slice(startsAt, endsAt) ?? [] }]
 })
 
 const pieChartOptions = computed<ApexOptions>(() => ({
@@ -109,9 +112,10 @@ const barChartOptions = computed<ApexOptions>(() => {
       colors: ['#000']
     },
     xaxis: {
-      categories: stats.value['City']?.entries.slice(startsAt, endsAt) ?? [],
+      categories: cityRanking.value?.entries.slice(startsAt, endsAt) ?? [],
       min: 0,
-      max: stats.value['City']?.counts[0] ?? 0
+      max:
+        [...(cityRanking.value?.counts ?? [])].sort((a, b) => numericalSort(a, b, 'desc'))[0] ?? 0
     },
     yaxis: {
       labels: {
@@ -134,6 +138,8 @@ const barChartOptions = computed<ApexOptions>(() => {
   }
 })
 
+console.log({ barChartSeries, barChartOptions })
+
 function onThresholdSet(threshold: number) {
   initializeData()
   appliedOptions.value = 1
@@ -154,6 +160,14 @@ function onThresholdSet(threshold: number) {
     )
     stats.value.Country = { counts, entries }
   }
+  if (cityRanking.value) {
+    const [counts, entries] = filterSiblingArrays(
+      (value) => value > threshold,
+      cityRanking.value!.counts,
+      cityRanking.value!.entries
+    )
+    cityRanking.value = { counts, entries }
+  }
 }
 
 function initializeData() {
@@ -167,7 +181,19 @@ function initializeData() {
 
   stats.value.Country = Country
   stats.value.City = { counts: cityCounts, entries: cityEntries }
+  cityRanking.value = { counts: cityCounts, entries: cityEntries }
 }
+
+watch(cityRankingOrder, (order) => {
+  if (cityRanking.value) {
+    const [cityCounts, cityEntries] = sortSiblingArrays(
+      (a, b) => numericalSort(a, b, order),
+      cityRanking.value.counts,
+      cityRanking.value.entries
+    )
+    cityRanking.value = { counts: cityCounts, entries: cityEntries }
+  }
+})
 
 onMounted(() => {
   console.log('Running onMounted hook')
@@ -187,7 +213,7 @@ onMounted(() => {
       }
     "
   />
-  <div class="mx-auto flex h-full w-[80rem] flex-col items-start gap-12 pt-10">
+  <div class="mx-auto flex h-full w-[80rem] flex-col items-start gap-12 py-10">
     <div class="flex w-full items-center justify-between">
       <h2 class="text-4xl font-semibold text-emerald-50">
         <font-awesome-icon icon="fa-solid fa-chart-pie" /> Demographic Data
@@ -243,11 +269,21 @@ onMounted(() => {
         </div>
       </aside>
     </div>
-    <aside class="flex h-[51.5rem] w-full flex-col gap-3 rounded-md bg-emerald-100 p-4">
-      <h2 class="pl-6 text-2xl font-semibold text-black">City Ranking</h2>
+    <aside class="flex h-[51.5rem] w-full select-none flex-col gap-3 rounded-md bg-emerald-100 p-4">
+      <div class="flex w-full items-center justify-between">
+        <h2 class="pl-6 text-2xl font-semibold text-black">City Ranking</h2>
+        <h2
+          @click="() => (cityRankingOrder = cityRankingOrder === 'asc' ? 'desc' : 'asc')"
+          :class="`cursor-pointer rounded-md px-2 py-1.5 text-2xl font-semibold text-black hover:text-emerald-600`"
+        >
+          {{ cityRankingOrder === 'asc' ? 'Ascending' : 'Descending' }}
+          <font-awesome-icon v-if="cityRankingOrder === 'desc'" icon="fa-solid fa-arrow-down" />
+          <font-awesome-icon v-else icon="fa-solid fa-arrow-up" />
+        </h2>
+      </div>
       <div class="flex h-full w-full gap-8">
         <div
-          v-if="stats.City?.counts.length === 0"
+          v-if="(cityRanking.counts ?? []).length === 0"
           class="flex h-full w-full items-center justify-center"
         >
           <span class="text-black">No city data for the applied filters.</span>
@@ -264,16 +300,18 @@ onMounted(() => {
               v-if="barChartPagination.currentPage !== 1"
               @click="() => barChartPagination.currentPage--"
               class="cursor-pointer select-none text-2xl text-black hover:text-emerald-500"
-              ><font-awesome-icon icon="fa-solid fa-arrow-up"
-            /></span>
+            >
+              <font-awesome-icon icon="fa-solid fa-arrow-up" />
+            </span>
             <span
               v-if="
-                barChartPagination.currentPage !== Math.ceil((stats.City?.counts.length ?? 0) / 10)
+                barChartPagination.currentPage !== Math.ceil((cityRanking?.counts.length ?? 0) / 10)
               "
               @click="() => barChartPagination.currentPage++"
               class="mt-auto cursor-pointer select-none text-2xl text-black hover:text-emerald-500"
-              ><font-awesome-icon icon="fa-solid fa-arrow-down"
-            /></span>
+            >
+              <font-awesome-icon icon="fa-solid fa-arrow-down" />
+            </span>
           </div>
         </template>
       </div>
@@ -281,6 +319,42 @@ onMounted(() => {
     <h2 class="text-4xl font-semibold text-emerald-50">
       <font-awesome-icon icon="fa-solid fa-magnifying-glass-chart" /> Compare Data
     </h2>
+    <div class="flex gap-5">
+      <aside class="flex min-h-[28.188rem] rounded-md bg-emerald-100 p-4">
+        <div v-if="stats.Country?.counts.length === 0" class="w-1/2 text-center">
+          <span class="text-center text-black">No country data for the applied filters.</span>
+        </div>
+        <div v-else class="flex flex-col gap-3">
+          <h2 class="text-2xl font-semibold text-black">By Country</h2>
+          <div class="h-[23.438rem] w-[37.5rem]">
+            <apexchart
+              type="pie"
+              width="600px"
+              height="600px"
+              :options="countryPieChartOptions"
+              :series="stats.Country?.counts ?? []"
+            ></apexchart>
+          </div>
+        </div>
+      </aside>
+      <aside class="flex min-h-[28.188rem] rounded-md bg-emerald-100 p-4">
+        <div v-if="stats.City?.counts.length === 0" class="ml-auto w-1/2 text-center">
+          <span class="text-center text-black">No city data for the applied filters.</span>
+        </div>
+        <div v-else class="flex flex-col gap-3">
+          <h2 class="text-2xl font-semibold text-black">By City</h2>
+          <div class="h-[23.438rem] w-[37.5rem]">
+            <apexchart
+              type="pie"
+              width="600px"
+              height="600px"
+              :options="cityPieChartOptions"
+              :series="stats.City?.counts ?? []"
+            ></apexchart>
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
 </template>
 
