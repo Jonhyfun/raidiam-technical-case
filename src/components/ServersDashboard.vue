@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import type { ApexOptions } from 'apexcharts'
 import ThresholdModal from '@/components/Modal/ThresholdModal.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useParticipants } from '../stores/participants'
 import { filterSiblingArrays } from '@/utils/array'
 import { useRoute } from 'vue-router'
+import PieChart from './charts/PieChart.vue'
+import type { ParticipantObject } from '@/stores/participants/types'
+import GroupTable from './Table/GroupTable.vue'
+import { getDateLabelFromEpoch } from '@/utils/date'
 
 const { aggregateByArrayProperties } = useParticipants()
 
 type ParticipantUsedKeys = 'AuthorisationServers'
+
+const { query } = useRoute()
 
 const stats = ref<
   Partial<{
@@ -17,33 +22,9 @@ const stats = ref<
   }>
 >({} as any)
 
-const { query } = useRoute()
-
 const thresholdModalOpen = ref<boolean>(false)
 const appliedOptions = ref(0)
-
-const pieChartOptions = computed<ApexOptions>(() => ({
-  chart: {
-    width: '600px',
-    height: '600px',
-    type: 'pie',
-    toolbar: {
-      show: true
-    }
-  },
-  stroke: {
-    width: 1,
-    colors: ['#000']
-  },
-  legend: {
-    width: 200
-  }
-}))
-
-const authorisationPieChartOptions = computed(() => ({
-  ...pieChartOptions.value,
-  labels: stats.value['AuthorisationServers']?.entries ?? []
-}))
+const serversList = ref<ParticipantObject['AuthorisationServers']>([])
 
 function onThresholdSet(threshold: number) {
   initializeData()
@@ -72,11 +53,15 @@ function onThresholdSet(threshold: number) {
 }
 
 function initializeData() {
-  stats.value = aggregateByArrayProperties('CustomerFriendlyName', 'AuthorisationServers')
+  const {
+    AuthorisationServers: { counts, entries }
+  } = aggregateByArrayProperties('CustomerFriendlyName', 'AuthorisationServers')
+
+  serversList.value = Object.values(entries)
+  stats.value.AuthorisationServers = { counts, entries: Object.keys(entries) }
 }
 
 onMounted(() => {
-  console.log('Running onMounted hook')
   if (query.threshold) {
     onThresholdSet(Number(query.threshold))
   } else {
@@ -117,21 +102,55 @@ onMounted(() => {
         </h2>
       </div>
     </div>
-    <div class="flex items-center gap-5 rounded-md bg-emerald-100 p-4">
-      <div class="flex flex-col gap-3">
+    <div class="flex h-[28.25rem] w-[41rem] gap-5 rounded-md bg-emerald-100 p-4">
+      <div class="flex h-full w-full flex-col gap-3">
         <h2 class="text-2xl font-semibold text-black">Participant Share</h2>
-        <div class="h-[23.438rem] w-[37.5rem]">
-          <apexchart
-            type="pie"
-            width="600px"
-            height="600px"
-            :options="authorisationPieChartOptions"
-            :series="stats.AuthorisationServers?.counts ?? []"
-          ></apexchart>
-        </div>
+        <PieChart :data="stats.AuthorisationServers">
+          <template #blankState>
+            <div class="flex h-full w-full items-center justify-center">
+              <span class="text-center text-black">
+                No Authorization Server data for the applied filters.
+              </span>
+            </div>
+          </template>
+        </PieChart>
       </div>
     </div>
-    <div class="flex h-[48.75rem] w-full items-center gap-8 rounded-md bg-emerald-100 p-4"></div>
+    <div class="flex h-[42rem] w-full flex-col gap-8 rounded-md bg-emerald-100 p-4">
+      <h2 class="text-2xl font-semibold text-black">Authorization Servers</h2>
+      <GroupTable
+        :groupData="serversList"
+        :groupOptions="{
+          keyProp: 'AuthorisationServerId',
+          labelProp: 'CustomerFriendlyName',
+          svgProp: 'CustomerFriendlyLogoUri'
+        }"
+        :groupOptionLabels="{
+          CreatedAt: 'Created at',
+          CustomerFriendlyDescription: 'Description',
+          Issuer: 'Server Issuer',
+          Flags: 'Flags',
+          SupportsCiba: 'Supports Ciba?'
+        }"
+        :groupOptionFormatters="{
+          CreatedAt: (createdAt) => {
+            return getDateLabelFromEpoch(createdAt)
+          },
+          Flags: (flags) => {
+            const flagsString = Object.keys(flags)
+              .filter((flag) => flags[flag])
+              .join(' / ')
+            if (!flagsString) return null
+            return flagsString
+          },
+          SupportsCiba: (supportsCiba) => {
+            console.log({ supportsCiba })
+            return supportsCiba ? 'Yes' : 'No'
+          }
+        }"
+      >
+      </GroupTable>
+    </div>
   </PageContainer>
 </template>
 

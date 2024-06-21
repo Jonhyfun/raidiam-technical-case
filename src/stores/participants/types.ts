@@ -19,7 +19,7 @@ interface OrganisationAuthorityClaim {
   Role: string
   Authorisations: {
     Status: 'Active' | 'Inactive'
-    MemberState: string // Assuming this is a two-letter code
+    MemberState: string
   }[]
   RegistrationId: string
 }
@@ -34,8 +34,8 @@ interface OrganisationAuthorityDomainClaim {
 }
 
 interface AuthorisationServerCertification {
-  CertificationStartDate: string // Assuming this is a date string
-  CertificationExpirationDate: string // Assuming this is a date string
+  CertificationStartDate: string
+  CertificationExpirationDate: string
   CertificationId: string
   AuthorisationServerId: string
   Status: 'Awaiting Certification' | 'Certified' | 'Deprecated' | 'Rejected' | 'Self-Certified'
@@ -61,14 +61,16 @@ interface ApiResource {
   | 'Deprecated'
   | 'Rejected'
   | 'Self-Certified'
-  CertificationStartDate: string // Assuming this is a date string
-  CertificationExpirationDate: string // Assuming this is a date string
+  CertificationStartDate: string
+  CertificationExpirationDate: string
   ApiFamilyType: string
 }
 
 interface AuthorisationServer {
   AuthorisationServerId: string
+  Flags: Record<string, boolean>
   OrganisationId: string
+  CreatedAt: string
   AutoRegistrationSupported: boolean
   SupportsCiba: boolean
   SupportsDCR: boolean
@@ -89,7 +91,7 @@ export interface ParticipantObject {
   OrganisationId: string
   Status: 'Active' | 'Pending' | 'Withdrawn'
   OrganisationName: string
-  CreatedOn: string // Assuming this is a date/time string
+  CreatedOn: string
   LegalEntityName: string
   CountryOfRegistration: string
   CompanyRegister: string

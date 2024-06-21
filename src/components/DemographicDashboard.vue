@@ -7,10 +7,13 @@ import BarChart from '@/components/charts/BarChart.vue'
 import { onMounted, ref, watch } from 'vue'
 import { useParticipants } from '../stores/participants'
 import { filterSiblingArrays, numericalSort, sortSiblingArrays } from '@/utils/array'
+import { useRoute } from 'vue-router'
 
 const { aggregateByProperties } = useParticipants()
 
 type ParticipantUsedKeys = 'City' | 'Country'
+
+const { query } = useRoute()
 
 const stats = ref<
   Partial<{
@@ -79,13 +82,16 @@ watch(cityRankingOrder, (order) => {
 })
 
 onMounted(() => {
-  initializeData()
+  if (query.threshold) {
+    onThresholdSet(Number(query.threshold))
+  } else {
+    initializeData()
+  }
 })
 </script>
 
 <template>
   <ThresholdModal
-    v-if="stats.Country && stats.City && cityRanking"
     :open="thresholdModalOpen"
     :onCloseClick="() => (thresholdModalOpen = false)"
     @onThresholdSet="onThresholdSet"

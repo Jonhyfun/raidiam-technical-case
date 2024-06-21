@@ -20,46 +20,32 @@ export const useParticipants = defineStore('participants', () => {
       })
   }
 
-  function aggregateByArrayProperties<T extends ArrayKeys<ParticipantObject>>(
-    key: keyof ParticipantObject[T][number],
+  function aggregateByArrayProperties<T extends ArrayKeys<ParticipantObject>, J extends keyof ParticipantObject[T][number]>(
+    key: J,
     ...properties: T[]
-  ): { [key in T]: { entries: string[]; counts: number[] } } {
+  ): { [key in T]: { entries: { [key in string]: ParticipantObject[T][number] }; counts: number[] } } {
     if (!participants.value)
       throw new Error('Please make sure you are calling aggregateByArrayProperties inside a RouterView')
 
-    const result: { [key in T]: { entries: string[]; counts: number[] } } = {} as any
+    const result: { [key in T]: { entries: { [key in string]: ParticipantObject[T][number] }; counts: number[] } } = {} as any
 
     participants.value.forEach((participant) => {
       properties.forEach((property) => {
-        if (!result[property]) result[property] = { entries: [], counts: [] }
+        if (!result[property]) result[property] = { entries: {} as { [key in string]: ParticipantObject[T][number] }, counts: [] }
 
         const propertyValues = (participant as any)[property]
 
-        if (Array.isArray(propertyValues)) {
-          propertyValues.forEach((value: any) => {
-            const keyValue = value[key].toUpperCase()
+        propertyValues.forEach((value: ParticipantObject[T][number]) => {
+          const keyValue = (value[key] as string).toUpperCase() as T
 
-            let entryIndex = result[property].entries.indexOf(keyValue)
-            if (entryIndex === -1) {
-              entryIndex = result[property].entries.length
-              result[property].entries.push(keyValue)
-              result[property].counts.push(1)
-            } else {
-              result[property].counts[entryIndex] += 1
-            }
-          })
-        } else {
-          const propertyValue = propertyValues.toUpperCase()
-
-          let entryIndex = result[property].entries.indexOf(propertyValue)
+          const entryIndex = Object.keys(result[property].entries).indexOf(keyValue)
           if (entryIndex === -1) {
-            entryIndex = result[property].entries.length
-            result[property].entries.push(propertyValue)
+            result[property].entries[keyValue] = value
             result[property].counts.push(1)
           } else {
             result[property].counts[entryIndex] += 1
           }
-        }
+        })
       })
     })
 
@@ -98,6 +84,5 @@ export const useParticipants = defineStore('participants', () => {
 
     return result
   }
-
   return { loadingParticipants, participants, loadParticipants, aggregateByArrayProperties, aggregateByProperties }
 })
