@@ -12,7 +12,7 @@ describe('Data fetching', () => {
   it('doesnt load again on route changes', () => {
     cy.visit('/')
 
-    cy.get('a[href="/about"]').click()
+    cy.get('a[href="/authorization?threshold=2"]').click()
 
     cy.contains('span', 'Loading...').should('not.exist')
   })
