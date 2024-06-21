@@ -30,15 +30,13 @@ onMounted(() => {
 
 <template>
   <Modal :open="open" @closeClick="onCloseClick">
-    <template #title>
-      <h2>Teste</h2>
-    </template>
+    <template #title> <h2 class="text-xl font-bold text-black">Filters</h2> </template>
     <template #content>
       <div class="flex flex-col gap-10">
         <div class="flex flex-col gap-2">
-          <span class="text-lg font-semibold text-black"
-            >Threshold <span class="text-xs">(values greater than)</span></span
-          >
+          <span class="text-lg font-semibold text-black">
+            Threshold <span class="text-xs">(values greater than)</span>
+          </span>
           <input
             type="number"
             class="text-md rounded-md border-[1px] border-solid border-black px-1.5 py-0.5 text-black"

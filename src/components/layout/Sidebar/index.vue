@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { IconType } from '@/utils/types'
 import SidebarOption from './SidebarOption.vue'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useDashboard } from '../../../stores/dashboard'
 import { storeToRefs } from 'pinia'

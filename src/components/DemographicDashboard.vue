@@ -170,29 +170,6 @@ onMounted(() => {
         </BarChart>
       </div>
     </aside>
-    <h2 class="text-4xl font-semibold text-emerald-50">
-      <font-awesome-icon icon="fa-solid fa-magnifying-glass-chart" /> Compare Data
-    </h2>
-    <div class="flex w-full gap-5">
-      <aside class="flex min-h-[28.188rem] w-full rounded-md bg-emerald-100 p-4">
-        <PieChart :data="stats.Country">
-          <template #blankState>
-            <div class="m-auto text-center">
-              <span class="text-center text-black">No country data for the applied filters.</span>
-            </div>
-          </template>
-        </PieChart>
-      </aside>
-      <aside class="flex min-h-[28.188rem] w-full rounded-md bg-emerald-100 p-4">
-        <PieChart :data="stats.City">
-          <template #blankState>
-            <div class="m-auto text-center">
-              <span class="text-center text-black">No city data for the applied filters.</span>
-            </div>
-          </template>
-        </PieChart>
-      </aside>
-    </div>
   </PageContainer>
 </template>
 

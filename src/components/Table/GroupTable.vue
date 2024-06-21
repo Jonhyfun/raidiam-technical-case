@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
 import { slicePagination } from '@/utils/array'
-import { computed, defineProps, ref, toRefs, watch, type VNode } from 'vue'
+import { computed, defineProps, ref, toRefs, watch } from 'vue'
 
 const props = defineProps<{
   groupData: T[]

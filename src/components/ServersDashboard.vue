@@ -102,7 +102,7 @@ onMounted(() => {
         </h2>
       </div>
     </div>
-    <div class="flex h-[28.25rem] w-[41rem] gap-5 rounded-md bg-emerald-100 p-4">
+    <aside class="flex h-[28.25rem] w-[41rem] gap-5 rounded-md bg-emerald-100 p-4">
       <div class="flex h-full w-full flex-col gap-3">
         <h2 class="text-2xl font-semibold text-black">Participant Share</h2>
         <PieChart :data="stats.AuthorisationServers">
@@ -115,8 +115,8 @@ onMounted(() => {
           </template>
         </PieChart>
       </div>
-    </div>
-    <div class="flex h-[42rem] w-full flex-col gap-8 rounded-md bg-emerald-100 p-4">
+    </aside>
+    <aside class="flex h-[42rem] w-full flex-col gap-8 rounded-md bg-emerald-100 p-4">
       <h2 class="text-2xl font-semibold text-black">Authorization Servers</h2>
       <GroupTable
         :groupData="serversList"
@@ -150,7 +150,7 @@ onMounted(() => {
         }"
       >
       </GroupTable>
-    </div>
+    </aside>
   </PageContainer>
 </template>
 

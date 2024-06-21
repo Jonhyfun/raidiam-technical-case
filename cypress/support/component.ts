@@ -21,19 +21,25 @@ import './commands'
 
 // Import global styles
 import '@/assets/main.css'
+import VueApexCharts from 'vue3-apexcharts'
 
 import { mount } from 'cypress/vue'
 
-import { useDashboard } from '../../src/stores/dashboard'
 import { createPinia, setActivePinia } from 'pinia'
+
+import { useDashboard } from '../../src/stores/dashboard'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import router from '../../src/router'
 
 setActivePinia(
   createPinia()
 )
 
-const dashboardStore = useDashboard()
+const store = useDashboard()
 
-Cypress.Commands.add('getDashboardStore', () => dashboardStore)
+Cypress.Commands.add('getDashboardStore', () => store)
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
@@ -44,12 +50,39 @@ declare global {
   namespace Cypress {
     interface Chainable {
       mount: typeof mount
-      getDashboardStore()
+      getDashboardStore: () => ReturnType<typeof useDashboard>
     }
   }
 }
 
-Cypress.Commands.add('mount', mount)
+Cypress.Commands.add('mount', (component, options = {}) => {
+  options.global = options.global || {}
+  options.global.plugins = options.global.plugins || []
+
+  //// create router if one is not provided
+  //if (!(options as any).router) {
+  //  (options as any).router = createRouter({
+  //    routes: routes.getRoutes(),
+  //    history: createMemoryHistory(),
+  //  })
+  //}
+
+  library.add(fas)
+
+  // Add router plugin
+  options.global.plugins.push({
+    install(app) {
+      app.use(router)
+      app.use(VueApexCharts)
+      app.component('font-awesome-icon', FontAwesomeIcon)
+      app.use(createPinia())
+    },
+  })
+
+
+
+  return mount(component, options)
+})
 
 // Example use:
 // cy.mount(MyComponent)
